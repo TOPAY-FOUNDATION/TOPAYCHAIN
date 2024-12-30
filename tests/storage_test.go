@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/storage"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/storage"
 )
 
 func TestFileStorage(t *testing.T) {

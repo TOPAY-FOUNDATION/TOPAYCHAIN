@@ -1,24 +1,16 @@
 package consensus
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
+	"crypto/rand"
 	"math/big"
 )
 
-func CalculateHash(data string) string {
-	hash := sha256.Sum256([]byte(data))
-	return hex.EncodeToString(hash[:])
-}
-
-func GenerateRandomNumber(max *big.Int) *big.Int {
-	return big.NewInt(0).Rand(big.NewInt(0), max)
-}
-
-func VerifyBlockHash(hash string, difficulty int) bool {
-	prefix := ""
-	for i := 0; i < difficulty; i++ {
-		prefix += "0"
+// GenerateRandomNumber generates a random number in the range [0, max).
+func GenerateRandomNumber(max *big.Int) (*big.Int, error) {
+	// Use crypto/rand to generate a secure random number
+	randomNum, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return nil, err
 	}
-	return hash[:difficulty] == prefix
+	return randomNum, nil
 }

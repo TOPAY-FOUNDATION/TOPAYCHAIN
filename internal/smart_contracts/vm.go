@@ -6,9 +6,9 @@ import (
 )
 
 type ExecutionContext struct {
-	Sender    string                 // Address of the sender
-	Receiver  string                 // Address of the contract
-	Arguments map[string]interface{} // Arguments passed to the contract
+	Sender    string
+	Receiver  string
+	Arguments map[string]interface{}
 }
 
 type VirtualMachine struct {
@@ -24,13 +24,11 @@ func NewVirtualMachine(gasLimit uint64) *VirtualMachine {
 }
 
 func (vm *VirtualMachine) Execute(contract *SmartContract, function string, args map[string]interface{}) (interface{}, error) {
-	// Decode and simulate contract execution
-	vm.GasUsed += 10 // Example gas usage per execution
+	vm.GasUsed += 10 // Example gas usage
 	if vm.GasUsed > vm.GasLimit {
 		return nil, errors.New("gas limit exceeded")
 	}
 
-	// Example: Simulate contract logic with JSON interpretation
 	switch function {
 	case "set":
 		key, ok := args["key"].(string)
@@ -46,9 +44,13 @@ func (vm *VirtualMachine) Execute(contract *SmartContract, function string, args
 		if !ok {
 			return nil, errors.New("missing or invalid key argument")
 		}
-		return contract.GetState(key)
+		state, exists := contract.GetState(key)
+		if !exists {
+			return nil, fmt.Errorf("state for key '%s' not found", key)
+		}
+		return state, nil
 
 	default:
-		return nil, fmt.Errorf("function %s not recognized", function)
+		return nil, fmt.Errorf("function '%s' not recognized", function)
 	}
 }

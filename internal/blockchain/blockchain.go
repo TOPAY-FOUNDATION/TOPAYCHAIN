@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/common"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/smart_contracts"
 	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/wallet"
 )
 
@@ -16,6 +17,26 @@ type Blockchain struct {
 	Tokens       map[string]*common.UtilityToken
 	Transactions []*Transaction
 	mutex        sync.Mutex
+}
+
+func (bc *Blockchain) AddSmartContract(contract *smart_contracts.SmartContract) {
+	panic("unimplemented")
+}
+
+func (bc *Blockchain) GetBalance(address string) (any, any) {
+	panic("unimplemented")
+}
+
+func (bc *Blockchain) GetSmartContract(contractAddress string) (any, any) {
+	panic("unimplemented")
+}
+
+func (bc *Blockchain) AddTransaction(tx *Transaction) any {
+	panic("unimplemented")
+}
+
+func (bc *Blockchain) AddWallet(w *wallet.Wallet) {
+	panic("unimplemented")
 }
 
 func NewBlockchain() *Blockchain {

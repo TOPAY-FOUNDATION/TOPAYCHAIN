@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/blockchain"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/blockchain"
 )
 
 func TestAddBlock(t *testing.T) {

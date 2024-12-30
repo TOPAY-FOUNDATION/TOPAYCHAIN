@@ -7,10 +7,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/blockchain"
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/smart_contracts"
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/utils"
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/wallet"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/blockchain"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/smart_contracts"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/wallet"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/pkg/utils"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 
 		switch choice {
 		case "1":
-			handleCreateWallet(bc, reader)
+			handleCreateWallet(bc)
 		case "2":
 			handleViewBlockchain(bc)
 		case "3":
@@ -59,7 +59,7 @@ func main() {
 	}
 }
 
-func handleCreateWallet(bc *blockchain.Blockchain, reader *bufio.Reader) {
+func handleCreateWallet(bc *blockchain.Blockchain) {
 	w, err := wallet.NewWallet()
 	if err != nil {
 		fmt.Printf("Error creating wallet: %v\n", err)
@@ -118,7 +118,12 @@ func handleViewWalletBalance(bc *blockchain.Blockchain, reader *bufio.Reader) {
 		return
 	}
 
-	fmt.Printf("Wallet Balance: %s\n", balance.String())
+	// Ensure `balance` is of type `*big.Int`
+	if bigBalance, ok := balance.(*big.Int); ok {
+		fmt.Printf("Wallet Balance: %s\n", bigBalance.String())
+	} else {
+		fmt.Println("Error: Balance is not of expected type *big.Int")
+	}
 }
 
 func handleDeploySmartContract(bc *blockchain.Blockchain, reader *bufio.Reader) {
@@ -144,6 +149,13 @@ func handleExecuteSmartContract(bc *blockchain.Blockchain, reader *bufio.Reader)
 		return
 	}
 
+	// Ensure `contract` is of type `*smart_contracts.SmartContract`
+	sc, ok := contract.(*smart_contracts.SmartContract)
+	if !ok {
+		fmt.Println("Error: Contract is not of expected type *smart_contracts.SmartContract")
+		return
+	}
+
 	fmt.Print("Enter function name (e.g., set, get): ")
 	function, _ := reader.ReadString('\n')
 	function = strings.TrimSpace(function)
@@ -161,7 +173,7 @@ func handleExecuteSmartContract(bc *blockchain.Blockchain, reader *bufio.Reader)
 	}
 
 	vm := smart_contracts.NewVirtualMachine(100000)
-	result, err := vm.Execute(contract, function, args)
+	result, err := vm.Execute(sc, function, args) // Use `sc` instead of `contract`
 	if err != nil {
 		fmt.Printf("Error executing contract: %v\n", err)
 		return

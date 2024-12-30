@@ -1,8 +1,9 @@
 package consensus
 
 import (
+	"crypto/rand"
+	"fmt"
 	"math/big"
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/blockchain"
 )
 
 type Validator struct {
@@ -30,27 +31,29 @@ func (pos *ProofOfStake) AddStake(address string, amount *big.Int) {
 	pos.Validators[address].Stake.Add(pos.Validators[address].Stake, amount)
 }
 
-func (pos *ProofOfStake) SelectValidator() string {
+func (pos *ProofOfStake) SelectValidator() (string, error) {
 	totalStake := big.NewInt(0)
 	for _, validator := range pos.Validators {
 		totalStake.Add(totalStake, validator.Stake)
 	}
 
-	target := big.NewInt(0).Rand(big.NewInt(0), totalStake)
-	accumulated := big.NewInt(0)
+	if totalStake.Cmp(big.NewInt(0)) == 0 {
+		return "", fmt.Errorf("no stake available to select a validator")
+	}
 
+	// Use crypto/rand to generate a random number in the range [0, totalStake)
+	target, err := rand.Int(rand.Reader, totalStake)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate random number: %v", err)
+	}
+
+	accumulated := big.NewInt(0)
 	for _, validator := range pos.Validators {
 		accumulated.Add(accumulated, validator.Stake)
 		if accumulated.Cmp(target) >= 0 {
-			return validator.Address
+			return validator.Address, nil
 		}
 	}
-	return ""
-}
 
-func (pos *ProofOfStake) ValidateBlock(block *blockchain.Block, validatorAddress string) bool {
-	if _, exists := pos.Validators[validatorAddress]; !exists {
-		return false
-	}
-	return blockchain.CalculateHash(block) == block.Hash
+	return "", fmt.Errorf("validator selection failed")
 }

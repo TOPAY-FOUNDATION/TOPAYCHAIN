@@ -4,8 +4,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/blockchain"
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/wallet"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/blockchain"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/wallet"
 )
 
 func TestNewTransaction(t *testing.T) {

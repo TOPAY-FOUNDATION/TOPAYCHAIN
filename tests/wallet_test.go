@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/wallet"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/wallet"
 )
 
 func TestNewWallet(t *testing.T) {

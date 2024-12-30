@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/network"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/network"
 )
 
 func TestPeerManager(t *testing.T) {
