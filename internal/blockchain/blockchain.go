@@ -2,14 +2,12 @@ package blockchain
 
 import (
 	"encoding/json"
-	"fmt"
-	"math/big"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
-	"tpy-blockchain/internal/common"
-	"tpy-blockchain/internal/wallet"
+
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/common"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/wallet"
 )
 
 type Blockchain struct {
