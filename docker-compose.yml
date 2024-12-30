@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  node1:
+    build:
+      context: .
+    container_name: blockchain_node1
+    ports:
+      - "8081:8080"
+    environment:
+      - NODE_ID=node1
+    command: go run main.go
+
+  node2:
+    build:
+      context: .
+    container_name: blockchain_node2
+    ports:
+      - "8082:8080"
+    environment:
+      - NODE_ID=node2
+    command: go run main.go
+
+  node3:
+    build:
+      context: .
+    container_name: blockchain_node3
+    ports:
+      - "8083:8080"
+    environment:
+      - NODE_ID=node3
+    command: go run main.go
