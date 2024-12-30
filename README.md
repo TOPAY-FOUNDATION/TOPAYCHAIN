@@ -51,6 +51,7 @@ topaychain/
 │   ├── wallet/                  # Wallet-related functionality
 │   ├── consensus/               # Consensus algorithms
 │   ├── storage/                 # Persistent storage
+│   ├── smart_contracts/         # Smart contract functionality
 │   ├── api/                     # API server setup and routes
 │   └── network/                 # P2P networking for blockchain nodes
 ├── pkg/                         # Shared reusable packages

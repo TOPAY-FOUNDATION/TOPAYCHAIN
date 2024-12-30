@@ -34,6 +34,11 @@ topaychain/
 │   │   ├── peer.go              # Peer management
 │   │   ├── messaging.go         # Node-to-node messaging
 │   │   └── sync.go              # Blockchain synchronization
+│   ├── smart_contracts/         # Smart contract functionality
+│   │   ├── contract.go          # Core smart contract structure and logic
+│   │   ├── vm.go                # Virtual machine for contract execution
+│   │   ├── contract_storage.go  # Persistent storage for contracts
+│   │   ├── contract_utils.go    # Helper functions for contracts
 ├── pkg/                         # Shared reusable packages
 │   ├── crypto/                  # Cryptographic utilities
 │   │   ├── hashing.go           # Hashing functions
@@ -56,15 +61,17 @@ topaychain/
 │   ├── api_test.go              # API endpoint tests
 │   ├── storage_test.go          # Storage-related tests
 │   ├── consensus_test.go        # Consensus algorithm tests
-│   └── network_test.go          # Network-related tests
+│   ├── network_test.go          # Network-related tests
+│   ├── smart_contract_test.go   # Smart contract-related tests
 ├── docs/                        # Documentation
 │   ├── architecture.md          # Detailed architecture explanation
 │   ├── api.md                   # API documentation
 │   ├── consensus.md             # Consensus mechanism explanation
-│   └── tokenomics.md            # Tokenomics documentation
+│   ├── tokenomics.md            # Tokenomics documentation
+│   └── smart_contracts.md       # Smart contract functionality documentation
 ├── Dockerfile                   # Dockerfile for containerization
 ├── docker-compose.yml           # Docker Compose for multi-node deployment
 ├── go.mod                       # Go module file for dependency management
-├── go.sum
-├── project.tree                    # Checksums for module dependencies
+├── go.sum                       # Checksums for module dependencies
+├── project.tree                 # Visual representation of the project structure
 └── README.md                    # Project documentation
