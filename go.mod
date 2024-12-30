@@ -21,6 +21,7 @@ require (
 
 require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
+	github.com/gorilla/mux v1.8.1
 	github.com/holiman/uint256 v1.3.1 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0
 	go.mongodb.org/mongo-driver v1.17.1
