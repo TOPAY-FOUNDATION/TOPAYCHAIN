@@ -7,12 +7,16 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/api"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/blockchain"
 )
 
 func TestGetBlocks(t *testing.T) {
-	// Create a router and register routes
+	// Create a router and a mock blockchain instance
 	router := mux.NewRouter()
-	api.RegisterRoutes(router)
+	mockBlockchain := blockchain.NewBlockchain()
+
+	// Register routes with both router and blockchain instance
+	api.RegisterRoutes(router, mockBlockchain)
 
 	// Create a new HTTP request
 	req, err := http.NewRequest("GET", "/blocks", nil)
@@ -32,7 +36,7 @@ func TestGetBlocks(t *testing.T) {
 	}
 
 	// Optionally, check the response body
-	expected := `[{"index":0,"hash":"abc123","transactions":[]}]`
+	expected := `[]` // Assuming an empty blockchain for the test
 	if rr.Body.String() != expected {
 		t.Errorf("Handler returned unexpected body: got %v, want %v", rr.Body.String(), expected)
 	}

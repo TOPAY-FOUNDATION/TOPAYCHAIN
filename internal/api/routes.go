@@ -2,72 +2,165 @@ package api
 
 import (
 	"encoding/json"
+	"math/big"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/TOPAY-FOUNDATION/TOPAYCHAIN/internal/blockchain"
 )
 
-// RegisterRoutes registers all API endpoints with the given router
-func RegisterRoutes(router *mux.Router) {
-	// Blockchain routes
+// Blockchain instance
+var blockchainInstance *blockchain.Blockchain
+
+// RegisterRoutes registers all API endpoints
+func RegisterRoutes(router *mux.Router, bc *blockchain.Blockchain) {
+	blockchainInstance = bc
+
 	router.HandleFunc("/blocks", handleGetBlocks).Methods("GET")
 	router.HandleFunc("/blocks/mine", handleMineBlock).Methods("POST")
-
-	// Wallet routes
 	router.HandleFunc("/wallets", handleCreateWallet).Methods("POST")
 	router.HandleFunc("/wallets/{address}/balance", handleGetBalance).Methods("GET")
-
-	// Transaction routes
 	router.HandleFunc("/transactions", handleAddTransaction).Methods("POST")
 	router.HandleFunc("/transactions/pending", handleGetPendingTransactions).Methods("GET")
+	router.HandleFunc("/rpc", handleJSONRPC).Methods("POST")
 }
 
-// handleGetBlocks handles the API request to retrieve all blocks
+// handleGetBlocks retrieves all blocks
 func handleGetBlocks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Example response (Replace with actual blockchain data retrieval logic)
-	blocks := []map[string]interface{}{
-		{"index": 0, "hash": "abc123", "transactions": []string{}},
+	if blockchainInstance == nil {
+		http.Error(w, "Blockchain not initialized", http.StatusInternalServerError)
+		return
 	}
-	json.NewEncoder(w).Encode(blocks)
+	json.NewEncoder(w).Encode(blockchainInstance.GetBlocks())
 }
 
-// handleMineBlock handles the API request to mine a new block
+// handleMineBlock mines a new block
 func handleMineBlock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Example response (Replace with actual block mining logic)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Block mined successfully!"})
+	block, err := blockchainInstance.MineBlock()
+	if err != nil {
+		if e, ok := err.(error); ok {
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "Unknown error occurred", http.StatusInternalServerError)
+		}
+		return
+	}
+	json.NewEncoder(w).Encode(block)
 }
 
-// handleCreateWallet handles the API request to create a new wallet
+// handleCreateWallet creates a wallet
 func handleCreateWallet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Example response (Replace with actual wallet creation logic)
-	json.NewEncoder(w).Encode(map[string]string{"address": "tpy1qxyz123", "mnemonic": "example mnemonic"})
+	wallet, err := blockchainInstance.CreateWallet()
+	if err != nil {
+		if e, ok := err.(error); ok {
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "Unknown error occurred", http.StatusInternalServerError)
+		}
+		return
+	}
+	json.NewEncoder(w).Encode(wallet)
 }
 
-// handleGetBalance handles the API request to retrieve a wallet's balance
+// handleGetBalance retrieves a wallet's balance
 func handleGetBalance(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	address := vars["address"]
-	// Example response (Replace with actual balance retrieval logic)
-	json.NewEncoder(w).Encode(map[string]string{"address": address, "balance": "1000"})
+	balance, err := blockchainInstance.GetBalance(address)
+	if err != nil {
+		if e, ok := err.(error); ok {
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "Unknown error occurred", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if bigBalance, ok := balance.(*big.Int); ok {
+		json.NewEncoder(w).Encode(map[string]string{"address": address, "balance": bigBalance.String()})
+	} else {
+		http.Error(w, "Balance type mismatch", http.StatusInternalServerError)
+	}
 }
 
-// handleAddTransaction handles the API request to add a new transaction
+// handleAddTransaction creates a new transaction
 func handleAddTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Example response (Replace with actual transaction creation logic)
+	var tx blockchain.Transaction
+	if err := json.NewDecoder(r.Body).Decode(&tx); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	err := blockchainInstance.AddTransaction(&tx)
+	if err != nil {
+		if e, ok := err.(error); ok {
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "Unknown error occurred", http.StatusInternalServerError)
+		}
+		return
+	}
 	json.NewEncoder(w).Encode(map[string]string{"message": "Transaction added successfully!"})
 }
 
-// handleGetPendingTransactions handles the API request to retrieve pending transactions
+// handleGetPendingTransactions retrieves all pending transactions
 func handleGetPendingTransactions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Example response (Replace with actual pending transactions retrieval logic)
-	pendingTransactions := []map[string]interface{}{
-		{"sender": "tpy1qabc", "receiver": "tpy1qxyz", "amount": "100"},
-	}
+	pendingTransactions := blockchainInstance.GetPendingTransactions()
 	json.NewEncoder(w).Encode(pendingTransactions)
+}
+
+// handleJSONRPC processes JSON-RPC requests
+func handleJSONRPC(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var request map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid JSON request", http.StatusBadRequest)
+		return
+	}
+
+	method, _ := request["method"].(string)
+	switch method {
+	case "eth_blockNumber":
+		handleBlockNumber(w)
+	case "eth_getBalance":
+		handleGetBalanceJSONRPC(w, request)
+	default:
+		http.Error(w, "Method not supported", http.StatusNotImplemented)
+	}
+}
+
+// handleBlockNumber retrieves the current block number for JSON-RPC
+func handleBlockNumber(w http.ResponseWriter) {
+	blockNumber := blockchainInstance.GetCurrentBlockNumber()
+	if blockNum, ok := blockNumber.(*big.Int); ok {
+		json.NewEncoder(w).Encode(map[string]string{"result": blockNum.String()})
+	} else {
+		http.Error(w, "Block number type mismatch", http.StatusInternalServerError)
+	}
+}
+
+// handleGetBalanceJSONRPC retrieves a wallet's balance for JSON-RPC
+func handleGetBalanceJSONRPC(w http.ResponseWriter, request map[string]interface{}) {
+	params, _ := request["params"].([]interface{})
+	address, _ := params[0].(string)
+	balance, err := blockchainInstance.GetBalance(address)
+	if err != nil {
+		if e, ok := err.(error); ok {
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "Unknown error occurred", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if bigBalance, ok := balance.(*big.Int); ok {
+		json.NewEncoder(w).Encode(map[string]string{"result": bigBalance.String()})
+	} else {
+		http.Error(w, "Balance type mismatch", http.StatusInternalServerError)
+	}
 }

@@ -19,6 +19,26 @@ type Blockchain struct {
 	mutex        sync.Mutex
 }
 
+func (bc *Blockchain) GetCurrentBlockNumber() any {
+	panic("unimplemented")
+}
+
+func (bc *Blockchain) GetPendingTransactions() any {
+	panic("unimplemented")
+}
+
+func (bc *Blockchain) CreateWallet() (any, any) {
+	panic("unimplemented")
+}
+
+func (bc *Blockchain) MineBlock() (any, any) {
+	panic("unimplemented")
+}
+
+func (bc *Blockchain) GetBlocks() any {
+	panic("unimplemented")
+}
+
 func (bc *Blockchain) AddSmartContract(contract *smart_contracts.SmartContract) {
 	panic("unimplemented")
 }
@@ -35,8 +55,15 @@ func (bc *Blockchain) AddTransaction(tx *Transaction) any {
 	panic("unimplemented")
 }
 
+// AddWallet adds a new wallet to the blockchain's wallet list
 func (bc *Blockchain) AddWallet(w *wallet.Wallet) {
-	panic("unimplemented")
+	// Ensure the wallet doesn't already exist
+	if _, exists := bc.Wallets[w.Address]; exists {
+		return // Wallet already exists; no need to add
+	}
+
+	// Add the wallet to the blockchain's wallet map
+	bc.Wallets[w.Address] = w
 }
 
 func NewBlockchain() *Blockchain {

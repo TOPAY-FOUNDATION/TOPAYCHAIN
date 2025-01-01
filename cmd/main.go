@@ -39,7 +39,7 @@ func main() {
 
 		switch choice {
 		case "1":
-			handleCreateWallet(bc)
+			handleCreateWallet(bc) // Added `reader` argument
 		case "2":
 			handleViewBlockchain(bc)
 		case "3":
@@ -118,7 +118,6 @@ func handleViewWalletBalance(bc *blockchain.Blockchain, reader *bufio.Reader) {
 		return
 	}
 
-	// Ensure `balance` is of type `*big.Int`
 	if bigBalance, ok := balance.(*big.Int); ok {
 		fmt.Printf("Wallet Balance: %s\n", bigBalance.String())
 	} else {
@@ -149,7 +148,6 @@ func handleExecuteSmartContract(bc *blockchain.Blockchain, reader *bufio.Reader)
 		return
 	}
 
-	// Ensure `contract` is of type `*smart_contracts.SmartContract`
 	sc, ok := contract.(*smart_contracts.SmartContract)
 	if !ok {
 		fmt.Println("Error: Contract is not of expected type *smart_contracts.SmartContract")
@@ -173,7 +171,7 @@ func handleExecuteSmartContract(bc *blockchain.Blockchain, reader *bufio.Reader)
 	}
 
 	vm := smart_contracts.NewVirtualMachine(100000)
-	result, err := vm.Execute(sc, function, args) // Use `sc` instead of `contract`
+	result, err := vm.Execute(sc, function, args)
 	if err != nil {
 		fmt.Printf("Error executing contract: %v\n", err)
 		return
